@@ -1,16 +1,4 @@
 <!doctype html>
-<!--
- Copyright 2021 Google LLC
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
- http://www.apache.org/licenses/LICENSE-2.0
-  Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
--->
 <html>
     <head>
      <title>Datastore and Firebase Auth Example</title>
@@ -18,8 +6,7 @@
      <!-- [START gae_python38_auth_init_firebase] -->
      <!-- [START gae_python3_auth_init_firebase] -->
      <!-- ********************************************************************************
-    ***********
-     * TODO(DEVELOPER): Paste the initialization snippet from:
+    ************ TODO(DEVELOPER): Paste the initialization snippet from:
      * http://console.firebase.google.com > Overview > Add Firebase to your web 
     app.
      ***************************************************************************
@@ -39,7 +26,7 @@
     e.css') }}">
     </head>
     <body>
-    <h1>Datastore and Firebase Auth Example</h1>
+    <h1>Video-Games online store</h1>
     <!-- [START gae_python38_auth_firebase_html] -->
     <!-- [START gae_python3_auth_firebase_html] -->
     <div id="firebaseui-auth-container"></div>
@@ -48,10 +35,11 @@
      <h2>Login info:</h2>
      {% if user_data %}
      <dl>
+         <h2>welcome back gamer</h2>
         <dt>Name</dt><dd>{{ user_data['name'] }}</dd>
         <dt>Email</dt><dd>{{ user_data['email'] }}</dd>
         <dt>Last 10 visits</dt><dd>
-        {% for time in times %} 
+        {% for time in times %}
         <p>{{ time['timestamp'] }}</p>
         {% endfor %} </dd>
         </dl>
@@ -71,15 +59,15 @@
        <script>
         // Your web app's Firebase configuration
         // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-       var firebaseConfig = { 
-        apiKey: "AIzaSyD9pmtjw1JHYrgrdvxhlRbgoYdBz6AVzUk", 
-        authDomain: "ad-labs-328821.firebaseapp.com", 
-        projectId: "ad-labs-328821", 
-        storageBucket: "ad-labs-328821.appspot.com", 
-        messagingSenderId: "205485707924", 
-        appId: "1:205485707924:web:e0a3decc659e03efd0da81", 
-        measurementId: "G-HZQ15377ZD"
-       }; 
+       const firebaseConfig = {
+        apiKey: "AIzaSyAGDRWcAZMpun88AsL4K98Zl0Y6fC2FAVs",
+        authDomain: "adassigment.firebaseapp.com",
+        projectId: "adassigment",
+        storageBucket: "adassigment.appspot.com",
+        messagingSenderId: "587152263058",
+        appId: "1:587152263058:web:3028ce4b09f200fd99e34b",
+        measurementId: "G-1HV6VEY963"
+        };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig); 
         firebase.analytics(); 

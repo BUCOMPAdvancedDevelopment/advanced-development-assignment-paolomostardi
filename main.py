@@ -1,9 +1,16 @@
 import datetime
+import json
 
-from flask import Flask, render_template, request
+from pymongo import MongoClient
+from bson.json_util import dumps
+
+
+from flask import Flask, render_template, request, jsonify
+
 from google.auth.transport import requests
 from google.cloud import datastore
 import google.oauth2.id_token
+
 
 firebase_request_adapter = requests.Request()
 
@@ -15,6 +22,27 @@ datastore_client = datastore.Client()
 # [END gae_python38_datastore_store_and_fetch_user_times]
 app = Flask(__name__)
 
+
+cluster = MongoClient("mongodb+srv://paolomostardi:tMfWyN51mysRllox@cluster0.aoiwmkj."
+                      + "mongodb.net/?retryWrites=true&w=majority")
+db = cluster["ADunit"]
+collection = db["Students"]
+
+
+def get_mongodb_items():
+    # Search data from Mongodb
+    # create queries
+
+    myCursor = collection.find({ "Gender": "0" })
+    list_cur = list(myCursor)
+    print(list_cur)
+    json_data = dumps(list_cur)
+    return json_data
+
+def store_mongodb(Unittitle, Unitleader, content, dateCreated, thumbnail):
+  # Write to MongoDB
+  json_data = {"Unit title": Unittitle, "Unit leader": Unitleader, "dateCreated": dateCreated, "thumbnail": thumbnail, "content": content}
+  collection.insert_one(json_data)
 
 # [START gae_python38_datastore_store_and_fetch_user_times]
 # [START gae_python3_datastore_store_and_fetch_user_times]
@@ -39,6 +67,7 @@ def fetch_times(email, limit):
 
 @app.route('/')
 def root():
+    print("hello in the root")
     # Verify Firebase auth.
     id_token = request.cookies.get("token")
     error_message = None
@@ -67,6 +96,17 @@ def root():
         'index.html',
         user_data=claims, error_message=error_message, times=times)
 
+@app.route('/display')
+def display():
+    jResponse = get_mongodb_items()
+    data= json.loads(jResponse)
+    print(jsonify(data))
+    print("success")
+    return jsonify(data)
+
+
+
+
 @app.route('/uploadfile')
 def uploadfile():
     # Verify Firebase auth.
@@ -86,19 +126,18 @@ def uploadfile():
                 id_token, firebase_request_adapter)
 
             store_time(claims['email'], datetime.datetime.now())
-            times = fetch_times(claims['email'], 10)
+            times = fetch_times(claims['email'], 5)
 
         except ValueError as exc:
             # This will be raised if the token is expired or any other
             # verification checks fail.
             error_message = str(exc)
 
-    return render_template(
-        'uploadfile.html',
-        user_data=claims, error_message=error_message, times=times)
+    return render_template('uploadfile.html',user_data=claims, error_message=error_message, times=times)
 
  
-
+def local_running_helper(request):
+    return root()
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
     # Engine, a webserver process such as Gunicorn will serve the app. This
