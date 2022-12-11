@@ -5,20 +5,14 @@
      <!-- See https://github.com/firebase/firebaseui-web. -->
      <!-- [START gae_python38_auth_init_firebase] -->
      <!-- [START gae_python3_auth_init_firebase] -->
-     <!-- ********************************************************************************
-    ************ TODO(DEVELOPER): Paste the initialization snippet from:
-     * http://console.firebase.google.com > Overview > Add Firebase to your web 
-    app.
-     ***************************************************************************
-    ************** -->
+
      <!-- [END gae_python3_auth_init_firebase] -->
      <!-- [END gae_python38_auth_init_firebase] -->
      
      <!-- [START gae_python38_auth_include_firebaseui] -->
      <!-- [START gae_python3_auth_include_firebaseui] -->
      <script src="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.js"></script>
-     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/
-    ui/4.5.0/firebase-ui-auth.css">
+     <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.css">
      <!-- [END gae_python3_auth_include_firebaseui] -->
      <!-- [END gae_python38_auth_include_firebaseui] -->
      <script src="{{ url_for('static', filename='script.js') }}"></script>
@@ -38,10 +32,9 @@
          <h2>welcome back gamer</h2>
         <dt>Name</dt><dd>{{ user_data['name'] }}</dd>
         <dt>Email</dt><dd>{{ user_data['email'] }}</dd>
-        <dt>Last 10 visits</dt><dd>
-        {% for time in times %}
-        <p>{{ time['timestamp'] }}</p>
-        {% endfor %} </dd>
+        <dt>Last visit {{ times }}</dt>
+        <dt>List of games {{ games }}</dt>
+        <button id="show-games" hidden=true>Show list of games</button>
         </dl>
         {% elif error_message %} 
         <p>Error: {{ error_message }}</p>

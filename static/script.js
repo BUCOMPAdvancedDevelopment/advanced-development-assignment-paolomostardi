@@ -20,10 +20,13 @@ window.addEventListener('load', function () {
   document.getElementById('sign-out').onclick = function () {
     firebase.auth().signOut();
   };
+  document.getElementById('show-games').onclick = function() {
+
+  }
 
   // FirebaseUI config.
   var uiConfig = {
-    signInSuccessUrl: '/',
+    signInSuccessUrl: '/yee',
     signInOptions: [
       // Comment out any lines corresponding to providers you did not check in
       // the Firebase console.
@@ -44,6 +47,7 @@ window.addEventListener('load', function () {
       // User is signed in, so display the "sign out" button and login info.
       document.getElementById('sign-out').hidden = false;
       document.getElementById('login-info').hidden = false;
+      document.getElementById('show-games').hidden = false;
       console.log(`Signed in as ${user.displayName} (${user.email})`);
       user.getIdToken().then(function (token) {
         // Add the token to the browser's cookies. The server will then be

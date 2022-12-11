@@ -1,1 +1,10 @@
+# [START gae_python37_cloudsql_config]
 runtime: python39
+
+
+env_variables:
+  CLOUD_SQL_USERNAME: basicuser
+  CLOUD_SQL_PASSWORD: OOOlll0000Paoop
+  CLOUD_SQL_DATABASE_NAME: ADassigment
+  CLOUD_SQL_CONNECTION_NAME: adassigment:europe-west2:adproject
+# [END gae_python37_cloudsql_config]

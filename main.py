@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 
 from pymongo import MongoClient
 from bson.json_util import dumps
@@ -10,6 +11,12 @@ from flask import Flask, render_template, request, jsonify
 from google.auth.transport import requests
 from google.cloud import datastore
 import google.oauth2.id_token
+import pymysql
+
+db_user = os.environ.get('CLOUD_SQL_USERNAME')
+db_password = os.environ.get('CLOUD_SQL_PASSWORD')
+db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
+db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 
 
 firebase_request_adapter = requests.Request()
@@ -67,7 +74,6 @@ def fetch_times(email, limit):
 
 @app.route('/')
 def root():
-    print("hello in the root")
     # Verify Firebase auth.
     id_token = request.cookies.get("token")
     error_message = None
@@ -94,7 +100,13 @@ def root():
 
     return render_template(
         'index.html',
-        user_data=claims, error_message=error_message, times=times)
+        user_data=claims, error_message=error_message, times=times,games=sql())
+
+
+
+@app.route('/yee')
+def yee():
+    return "you did it paolo"
 
 @app.route('/display')
 def display():
@@ -104,8 +116,32 @@ def display():
     print("success")
     return jsonify(data)
 
+@app.route('/sql')
+def sql():
+    # When deployed to App Engine, the `GAE_ENV` environment variable will be
+    # set to `standard`
+    if os.environ.get('GAE_ENV') == 'standard':
+        # If deployed, use the local socket interface for accessing Cloud SQL
+        unix_socket = '/cloudsql/{}'.format(db_connection_name)
+        cnx = pymysql.connect(user=db_user, password=db_password,
+                              unix_socket=unix_socket, db=db_name)
+    else:
+        # If running locally, use the TCP connections instead
+        # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
+        # so that your application can use 127.0.0.1:3306 to connect to your
+        # Cloud SQL instance
+        host = '127.0.0.1'
+        cnx = pymysql.connect(user=db_user, password=db_password,
+                              host=host, db=db_name)
 
+    with cnx.cursor() as cursor:
+        cursor.execute('select * from VIDEOGAME;')
+        result = cursor.fetchall()
+        current_msg = result[0][0]
+    cnx.close()
 
+    return str(result)
+# [END gae_python37_cloudsql_mysql]
 
 @app.route('/uploadfile')
 def uploadfile():
@@ -135,9 +171,16 @@ def uploadfile():
 
     return render_template('uploadfile.html',user_data=claims, error_message=error_message, times=times)
 
- 
-def local_running_helper(request):
+
+def local_root_helper(request):
     return root()
+
+
+def sql_helper(request):
+    print("hello")
+    return sql()
+
+
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App
     # Engine, a webserver process such as Gunicorn will serve the app. This
