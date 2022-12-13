@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 // [START gae_python38_log]
 'use strict';
 
@@ -22,7 +22,7 @@ function createList(){
     // create the ordered list
     const ol = document.createElement("ol");
     // iterate over the data and create list items for each item
-    fetch("https://adassigment.ew.r.appspot.com/sql")
+    fetch("https://adassigment.ew.r.appspot.com/getListOfGames")
      .then(response => response.text())
   .then(data => {
     data = data.slice(1, -1);

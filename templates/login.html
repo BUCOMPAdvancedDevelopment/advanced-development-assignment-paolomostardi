@@ -11,14 +11,7 @@
 <button id="sign-out" hidden=true class="btn btn-info">Sign Out</button>
 <div id="login-info" hidden=true>
     {% if user_data %}
-        {% block authenticatedContent %}
-            <p>Here's some of the details we have on you:</p>
-            <ul>
-                <li>Name: {{ user_data['name'] }}</li>
-                <li>Email: {{ user_data['email'] }}</li>
-            </ul>
-            <a href="/update_personal_details" class="btn btn-info">Edit your personal details</a>
-        {% endblock %}
+
     {% elif error_message %}
         {% block unauthenticatedContent %}
             <p>Error: {{ error_message }}</p>

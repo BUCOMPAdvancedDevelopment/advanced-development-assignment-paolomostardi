@@ -1,22 +1,18 @@
 import datetime
 import json
 import os
-
+import helper
 from pymongo import MongoClient
 from bson.json_util import dumps
 
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
 
 from google.auth.transport import requests
 from google.cloud import datastore
 import google.oauth2.id_token
 import pymysql
-
-db_user = os.environ.get('CLOUD_SQL_USERNAME')
-db_password = os.environ.get('CLOUD_SQL_PASSWORD')
-db_name = os.environ.get('CLOUD_SQL_DATABASE_NAME')
-db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
+import requests
 
 
 firebase_request_adapter = requests.Request()
@@ -75,19 +71,24 @@ def fetch_times(email, limit):
 
 
 @app.route('/')
+def index():
+    return redirect('/home')
+
+
 @app.route('/home')
 def home():
     return render_template('home.html')
 
 
-
 @app.route('/store')
 def store():
-    return render_template('store.html')
+    return render_template('store.html',listOfgame = getListOfGames())
 
 
 @app.route('/my_games')
 def my_games():
+    helper.authenticateUser(request.cookies.get("token"))
+
     return render_template('my_games.html')
 
 
@@ -96,114 +97,32 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/display')
-def display():
-    jResponse = get_mongodb_items()
-    data= json.loads(jResponse)
-    print(jsonify(data))
-    print("success")
-    return jsonify(data)
-
-
 @app.route('/addGame')
 def add_game():
     return "gameAdded"
 
 
-@app.route('/sql')
-def sql():
-    # When deployed to App Engine, the `GAE_ENV` environment variable will be
-    # set to `standard`
-    if os.environ.get('GAE_ENV') == 'standard':
-        # If deployed, use the local socket interface for accessing Cloud SQL
-        unix_socket = '/cloudsql/{}'.format(db_connection_name)
-        cnx = pymysql.connect(user=db_user, password=db_password,
-                              unix_socket=unix_socket, db=db_name)
-    else:
-        # If running locally, use the TCP connections instead
-        # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
-        # so that your application can use 127.0.0.1:3306 to connect to your
-        # Cloud SQL instance
-        host = '127.0.0.1'
-        cnx = pymysql.connect(user=db_user, password=db_password,
-                              host=host, db=db_name)
+@app.route('/getListOfGames', methods=['GET'])
+def getListOfGames():
+    return helper.sql_request('select * from VIDEOGAME')
 
-    with cnx.cursor() as cursor:
-        cursor.execute('select * from VIDEOGAME;')
-        result = cursor.fetchall()
-        current_msg = result[0][0]
-    cnx.close()
-
-    return str(result)
-# [END gae_python37_cloudsql_mysql]
 
 @app.route('/sqlRequestUser')
-def sql():
-    # When deployed to App Engine, the `GAE_ENV` environment variable will be
-    # set to `standard`
-    if os.environ.get('GAE_ENV') == 'standard':
-        # If deployed, use the local socket interface for accessing Cloud SQL
-        unix_socket = '/cloudsql/{}'.format(db_connection_name)
-        cnx = pymysql.connect(user=db_user, password=db_password,
-                              unix_socket=unix_socket, db=db_name)
-    else:
-        # If running locally, use the TCP connections instead
-        # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
-        # so that your application can use 127.0.0.1:3306 to connect to your
-        # Cloud SQL instance
-        host = '127.0.0.1'
-        cnx = pymysql.connect(user=db_user, password=db_password,
-                              host=host, db=db_name)
+def sql_request_user():
+    return helper.sql_request('select * from VIDEOGAME')
 
-    with cnx.cursor() as cursor:
-        cursor.execute('select * from USER_TABLE;')
-        result = cursor.fetchall()
-        current_msg = result[0][0]
-    cnx.close()
-
-    return str(result)
-# [END gae_python37_cloudsql_mysql]
+@app.route('/createUser')
+def sql_create_user():
+    return helper.sql_request('user')
 
 
-
-
-
-@app.route('/uploadfile')
-def uploadfile():
-    # Verify Firebase auth.
-    id_token = request.cookies.get("token")
-    error_message = None
-    claims = None
-    times = None
-
-    if id_token:
-        try:
-            # Verify the token against the Firebase Auth API. This example
-            # verifies the token on each page load. For improved performance,
-            # some applications may wish to cache results in an encrypted
-            # session store (see for instance
-            # http://flask.pocoo.org/docs/1.0/quickstart/#sessions).
-            claims = google.oauth2.id_token.verify_firebase_token(
-                id_token, firebase_request_adapter)
-
-            store_time(claims['email'], datetime.datetime.now())
-            times = fetch_times(claims['email'], 5)
-
-        except ValueError as exc:
-            # This will be raised if the token is expired or any other
-            # verification checks fail.
-            error_message = str(exc)
-
-    return render_template('uploadfile.html',user_data=claims, error_message=error_message, times=times)
-
-
-def local_root_helper(request):
-    return root()
-
-
-def sql_helper(request):
-    print("hello")
-    return sql()
+@app.route('/callfunction')
+def call(whatever):
+    url = "https://europe-west2-adassigment.cloudfunctions.net/helloworld"
+    req = requests.post(url, json={
+        "source": "select * ",
+    }, headers={"Content-type": "application/json", "Accept": "text/plain"})
+    return (req.content)
 
 
 if __name__ == '__main__':

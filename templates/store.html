@@ -1,3 +1,26 @@
-{% extends "base.html" %}
 
-games that you can buy
+
+<head>
+  <title>My page</title>
+  <nav class="navbar" style="text-align: center">
+    <style>
+      .navbar a {
+        color: #000000;
+        text-decoration: none;
+        padding: 10px 20px;
+        display: inline-block;
+        background-color: #ddb8b8;
+      }
+      .navbar a:hover {
+        background-color: #ec1e1e;
+      }
+    </style>
+    <a href="/home">Home</a>
+    <a href="/store">Store</a>
+    <a href="/my_games">My games</a>
+  </nav>
+</head>
+<script src="{{ url_for('static', filename='store.js') }}"></script>
+<body>
+    <p id="paragraph"  style="text-align: center"> </p>
+</body>
