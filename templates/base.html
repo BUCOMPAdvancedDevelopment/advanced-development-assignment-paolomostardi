@@ -1,22 +1,33 @@
-{% block header %}
-<head>
-<nav class="navbar" style="text-align: center">
-  <style>
-    .navbar a {
-      color: #000000;
-      text-decoration: none;
-      padding: 10px 20px;
-      display: inline-block;
-      background-color: #ddb8b8;
-    }
-    .navbar a:hover {
-      background-color: #ec1e1e;
-    }
-  </style>
-  <a href="/home">Home</a>
-  <a href="/store">Store</a>
-  <a href="/my_games">My games</a>
-
-</nav>
-</head>
-{% endblock  %}
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+        <title>{% block title %}{% endblock %} - Videogame Store</title>
+        <head>
+    <nav class="navbar" style="text-align: center">
+        <style>
+        .navbar a {
+        color: #000000;
+        text-decoration: none;
+        padding: 10px 20px;
+        display: inline-block;
+        background-color: #ddb8b8;
+        }
+        .navbar a:hover {
+        background-color: #ec1e1e;
+        }
+        </style>
+    <a href="/home">Home</a>
+    <a href="/store">Store</a>
+    <a href="/my_games">My games</a>
+    {% if user_data %}
+        <a href="/logout">Log out</a>
+        <div>signed in as: {{ user_data['name'] }}</div>
+    {% endif %}
+    </nav>
+    {% endblock %}
+  </head>
+  <body>
+    <div id="content">{% block content %}{% endblock %}</div>
+  </body>
+</html>

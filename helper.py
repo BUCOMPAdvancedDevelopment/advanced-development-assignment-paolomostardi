@@ -6,9 +6,7 @@ import requests
 
 from google.cloud import datastore
 from google.auth.transport import requests as googleRequests
-
-
-
+from flask import json
 firebase_request_adapter = googleRequests.Request()
 db_user = os.environ.get('CLOUD_SQL_USERNAME')
 db_password = os.environ.get('CLOUD_SQL_PASSWORD')
@@ -32,7 +30,7 @@ def authenticateUser(id_token):
             # This will be raised if the token is expired or any other
             # verification checks fail.
             error_message = str(exc)
-    return (claims, error_message,valid_token)
+    return (claims, error_message, valid_token)
 
 
 def sql_request(query):
@@ -63,12 +61,37 @@ def sql_request(query):
 
 
 def cloud_sql_query(query):
-        url = "https://europe-west2-adassigment.cloudfunctions.net/helloworld"
-        req = requests.post(url, json={
-            "query": query,
-        }, headers={"Content-type": "application/json", "Accept": "text/plain"})
-        return (req.content)
+    url = "https://europe-west2-adassigment.cloudfunctions.net/helloworld"
+    req = requests.post(url, json={
+        "query": query,
+    }, headers={"Content-type": "application/json", "Accept": "text/plain"})
+    result = req.content
+    print(result)
+    if result != b'Error: could not handle the request\n':
+        return json.loads(result)
+    else:
+        return None
 
 
-def find_sql_user(name):
-    query = 'select * from user WHERE VIDEOGAME_NAME = \'Tetris\''
+def get_sql_games_from_email(email, name):
+    user_id = get_sql_user_id_from_email(email)
+    if user_id is None:
+        create_sql_user(email, name)
+    query = 'SELECT GAME_ID from user WHERE '+user_id+' = user_id'
+    cloud_sql_query()
+
+
+def get_sql_user_id_from_email(email):
+    email = 'victor@gmail.com'
+    query = 'SELECT USER_ID from user WHERE email = \'' + email + '\''
+    return cloud_sql_query(query)
+
+
+def create_sql_user(email, name):
+    query = 'INSERT INTO USER_TABLE (EMAIL, NAME) VALUES (' + email + ',' + name + ');'
+    return cloud_sql_query(query)
+
+
+def find_sql_game_from_name(name):
+    query = 'select * from VIDEOGAME WHERE VIDEOGAME_NAME =     \''+name+'\''
+    return cloud_sql_query(query)
