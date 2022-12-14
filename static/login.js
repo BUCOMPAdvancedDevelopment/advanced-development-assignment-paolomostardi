@@ -23,7 +23,7 @@ window.addEventListener('load', function () {
 
   // FirebaseUI config.
   var uiConfig = {
-    signInSuccessUrl: '/home',
+    signInSuccessUrl: '/',
     signInOptions: [
       // Comment out any lines corresponding to providers you did not check in
       // the Firebase console.

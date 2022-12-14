@@ -43,6 +43,12 @@ def get_mongodb_items():
     return json_data
 
 
+def login_caller(rewuest):
+    return login()
+def mygames_caller(rewuest):
+    return my_games()
+
+
 def store_mongodb(Unittitle, Unitleader, content, dateCreated, thumbnail):
     # Write to MongoDB
     json_data = {"Unit title": Unittitle, "Unit leader": Unitleader, "dateCreated": dateCreated, "thumbnail": thumbnail, "content": content}
@@ -87,9 +93,12 @@ def store():
 
 @app.route('/my_games')
 def my_games():
-    helper.authenticateUser(request.cookies.get("token"))
+    infos,error,valid_token = helper.authenticateUser(request.cookies.get("token"))
+    if valid_token:
+        return render_template('my_games.html')
+    else :
+        return redirect('/login')
 
-    return render_template('my_games.html')
 
 
 @app.route('/login')
@@ -117,12 +126,10 @@ def sql_create_user():
 
 
 @app.route('/callfunction')
-def call(whatever):
-    url = "https://europe-west2-adassigment.cloudfunctions.net/helloworld"
-    req = requests.post(url, json={
-        "source": "select * ",
-    }, headers={"Content-type": "application/json", "Accept": "text/plain"})
-    return (req.content)
+def call(whaterer):
+    query = 'select * from VIDEOGAME WHERE VIDEOGAME_NAME = \'Tetris\''
+    response = helper.cloud_sql_query(query)
+    return response
 
 
 if __name__ == '__main__':
@@ -135,3 +142,8 @@ if __name__ == '__main__':
     # http://flask.pocoo.org/docs/1.0/quickstart/#static-files. Once deployed,
     # App Engine itself will serve those files as configured in app.yaml.
     app.run(host='127.0.0.1', port=8080, debug=True)
+
+
+
+
+

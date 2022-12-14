@@ -1,11 +1,13 @@
-import json
-import os
 
+import os
 import google.oauth2.id_token
 import pymysql
-from google.auth.transport import requests as googleRequests
 import requests
-from flask import request
+
+from google.cloud import datastore
+from google.auth.transport import requests as googleRequests
+
+
 
 firebase_request_adapter = googleRequests.Request()
 db_user = os.environ.get('CLOUD_SQL_USERNAME')
@@ -18,20 +20,19 @@ def authenticateUser(id_token):
     error_message = None
     claims = None
     times = None
-
+    valid_token = False
     if id_token:
         try:
             # Verify the token against the Firebase Auth API.
             claims = google.oauth2.id_token.verify_firebase_token(
                 id_token, firebase_request_adapter)
-
+            valid_token = True
 
         except ValueError as exc:
             # This will be raised if the token is expired or any other
             # verification checks fail.
             error_message = str(exc)
-
-    return (claims, error_message)
+    return (claims, error_message,valid_token)
 
 
 def sql_request(query):
@@ -61,18 +62,13 @@ def sql_request(query):
     # [END gae_python37_cloudsql_mysql]
 
 
-def addToBasket(userId, productId, qty):
-    """Adds a number of products to a specified user's basket
-    On success, returns 201
-    """
+def cloud_sql_query(query):
+        url = "https://europe-west2-adassigment.cloudfunctions.net/helloworld"
+        req = requests.post(url, json={
+            "query": query,
+        }, headers={"Content-type": "application/json", "Accept": "text/plain"})
+        return (req.content)
 
-    url = "https://europe-west2-synthetic-cargo-328708.cloudfunctions.net/add_mongodb_user_basket"
-    params = {
-        "userId": userId,
-        "productId": productId,
-        "qty": qty
-    }
-    response = requests.post(
-        url, params)
 
-    return response.status_code
+def find_sql_user(name):
+    query = 'select * from user WHERE VIDEOGAME_NAME = \'Tetris\''
