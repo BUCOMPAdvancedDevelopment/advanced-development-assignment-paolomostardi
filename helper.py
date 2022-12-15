@@ -64,8 +64,16 @@ def get_sql_games_from_email(email, name):
     if user_id is None:
         create_sql_user(email, name)
         return None
-    query = 'SELECT GAME_ID from USER_TABLE WHERE '+user_id+' = user_id'
-    cloud_sql_query()
+    print(user_id)
+    query = 'SELECT VIDEOGAME_ID from USER_VIDEOGAME WHERE user_id = \'' + str(user_id[0][0]) + '\''
+    return cloud_sql_query(query)
+
+
+def find_sql_game_from_id_list(list_id):
+    list_game = []
+    for game_id in list_id:
+        list_game.append(find_sql_game_from_id(game_id[0]))
+    return list_game
 
 
 def get_sql_user_id_from_email(email):
@@ -80,4 +88,10 @@ def create_sql_user(email, name):
 
 def find_sql_game_from_name(name):
     query = 'select * from VIDEOGAME WHERE VIDEOGAME_NAME =     \''+name+'\''
+    return cloud_sql_query(query)
+
+
+def find_sql_game_from_id(id):
+
+    query = 'select * from VIDEOGAME WHERE VIDEOGAME_ID = '+str(id)
     return cloud_sql_query(query)

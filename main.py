@@ -42,9 +42,10 @@ def store():
 @app.route('/my_games')
 def my_games():
     infos, error, valid_token = helper.authenticateUser(request.cookies.get("token"))
-    helper.get_sql_games_from_email(infos['email'], infos['name'])
     if valid_token:
-        return render_template('my_games.html', user_data=infos)
+        id_game_list = helper.get_sql_games_from_email(infos['email'], infos['name'])
+        games_info = helper.find_sql_game_from_id_list(id_game_list)
+        return render_template('my_games.html', user_data=infos, games_info=games_info)
     return redirect('/login')
 
 
@@ -60,7 +61,7 @@ def getListOfGames():
 
 @app.route('/test')
 def tester(sdfsdf):
-    return str(helper.create_sql_user('fake@fake.com','test test'))
+    return helper.find_sql_game_from_id_list(helper.get_sql_games_from_email('john.doe@gmail.com','test test'))
 
 
 if __name__ == '__main__':
