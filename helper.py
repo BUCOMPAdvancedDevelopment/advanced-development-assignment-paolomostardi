@@ -30,34 +30,20 @@ def authenticateUser(id_token):
             # This will be raised if the token is expired or any other
             # verification checks fail.
             error_message = str(exc)
-    return (claims, error_message, valid_token)
+    return claims, error_message, valid_token
 
 
-def sql_request(query):
-    # When deployed to App Engine, the `GAE_ENV` environment variable will be
-    # set to `standard`
-    if os.environ.get('GAE_ENV') == 'standard':
-        # If deployed, use the local socket interface for accessing Cloud SQL
-        unix_socket = '/cloudsql/{}'.format(db_connection_name)
-        cnx = pymysql.connect(user=db_user, password=db_password,
-                              unix_socket=unix_socket, db=db_name)
+def cloud_sql_insert(query):
+    url = "https://us-central1-adassigment.cloudfunctions.net/sql_cloud_insert"
+    req = requests.post(url, json={
+        "query": query,
+    }, headers={"Content-type": "application/json", "Accept": "text/plain"})
+    result = req.content
+    print(result)
+    if result != b'Error: could not handle the request\n':
+        return result
     else:
-        # If running locally, use the TCP connections instead
-        # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
-        # so that your application can use 127.0.0.1:3306 to connect to your
-        # Cloud SQL instance
-        host = '127.0.0.1'
-        cnx = pymysql.connect(user=db_user, password=db_password,
-                              host=host, db=db_name)
-
-    with cnx.cursor() as cursor:
-        cursor.execute(query)
-        result = cursor.fetchall()
-        current_msg = result[0][0]
-    cnx.close()
-
-    return str(result)
-    # [END gae_python37_cloudsql_mysql]
+        return None
 
 
 def cloud_sql_query(query):
@@ -77,19 +63,19 @@ def get_sql_games_from_email(email, name):
     user_id = get_sql_user_id_from_email(email)
     if user_id is None:
         create_sql_user(email, name)
-    query = 'SELECT GAME_ID from user WHERE '+user_id+' = user_id'
+        return None
+    query = 'SELECT GAME_ID from USER_TABLE WHERE '+user_id+' = user_id'
     cloud_sql_query()
 
 
 def get_sql_user_id_from_email(email):
-    email = 'victor@gmail.com'
-    query = 'SELECT USER_ID from user WHERE email = \'' + email + '\''
+    query = 'SELECT USER_ID from USER_TABLE WHERE email = \'' + email + '\''
     return cloud_sql_query(query)
 
 
 def create_sql_user(email, name):
-    query = 'INSERT INTO USER_TABLE (EMAIL, NAME) VALUES (' + email + ',' + name + ');'
-    return cloud_sql_query(query)
+    query = 'INSERT INTO USER_TABLE  ( email, name ) VALUES ( \''+email+'\', \''+name+'\');'
+    return cloud_sql_insert(query)
 
 
 def find_sql_game_from_name(name):

@@ -56,7 +56,11 @@ def login():
 # used to get the list of games in javascript files and others
 @app.route('/getListOfGames', methods=['GET'])
 def getListOfGames():
-    return helper.sql_request('select * from VIDEOGAME')
+    return helper.cloud_sql_query('select * from VIDEOGAME')
+
+@app.route('/test')
+def tester(sdfsdf):
+    return str(helper.create_sql_user('fake@fake.com','test test'))
 
 
 if __name__ == '__main__':
