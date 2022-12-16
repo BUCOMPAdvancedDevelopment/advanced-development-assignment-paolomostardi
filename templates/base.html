@@ -1,13 +1,14 @@
 <!doctype html>
-<html>
-  <head>
+<html style="background-color: #b6e2ab">
+  <head >
     {% block head %}
         <title>{% block title %}{% endblock %} - Videogame Store</title>
         <head>
-    <nav class="navbar" style="text-align: center">
+    <div style="background-color: #b1d0ad ; padding: 20px">
+    <nav class="navbar" style="text-align: center" >
         <style>
         .navbar a {
-        color: #000000;
+        color: #191919;
         text-decoration: none;
         padding: 10px 20px;
         display: inline-block;
@@ -22,12 +23,14 @@
     <a href="/my_games">My games</a>
     {% if user_data %}
         <a href="/logout">Log out</a>
+        <br>
         <div>Signed in as: {{ user_data['name'] }} </div>
     {% else %}
         <a href="/login">Login</a>
         <div>Login to access games</div>
     {% endif %}
     </nav>
+    </div>
     {% endblock %}
   </head>
   <body>
