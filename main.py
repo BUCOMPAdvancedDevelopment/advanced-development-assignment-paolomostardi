@@ -42,7 +42,7 @@ def store():
     if valid_token:
         user_id = helper.get_sql_user_id_from_email(user_data['email'])
         return render_template('store.html', list_game_info=get_list_of_all_games(),user_data=user_data,user_id=user_id)
-    return render_template('login.html')
+    return render_template('store.html')
 
 @app.route('/my_games')
 def my_games():
@@ -62,7 +62,7 @@ def my_games():
 def login():
     user_data, error, valid_token = helper.authenticateUser(request.cookies.get("token"))
     if valid_token:
-        return redirect('/my_games')
+        return redirect('/home')
     return render_template('login.html')
 
 
@@ -81,12 +81,22 @@ def get_list_of_all_games():
     return helper.cloud_sql_query('select * from VIDEOGAME')
 
 
-@app.route('/hello/<name>/<age>')
-def hello(name, age):
-    return f'Hello, {name}! You are {age} years old.'
+@app.route('/viewGame/<game_id>/<user_id>')
+def view_game(game_id, user_id):
+    user_data, error, valid_token = helper.authenticateUser(request.cookies.get("token"))
+    print(user_data)
+    if valid_token:
+        current_user_id = helper.get_sql_user_id_from_email(user_data['email'])
+        print(current_user_id)
+        if user_id == str(current_user_id[0][0]):
+            game_infos = helper.find_sql_game_from_id(game_id)
+            return render_template('game_page.html', user_id=user_id, game_id=game_id, game_infos=game_infos, user_data=user_data)
+        return render_template('access_denied.html', user_data=user_data)
+    return render_template('login.html')
+
 
 def tester(asd):
-    return store()
+    return view_game(3, 18)
 
 
 if __name__ == '__main__':

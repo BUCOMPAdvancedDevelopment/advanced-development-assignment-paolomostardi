@@ -16,10 +16,8 @@
 // [START gae_python38_log]
 'use strict';
 
-function buygame(number,number2){
-    alert(number)
-    alert(number2)
-    window.location.replace('/home')
+function buygame(game_id,user_id){
+    window.location.replace('/viewGame/'+game_id+'/'+user_id)
 }
 
 window.addEventListener('load', function () {

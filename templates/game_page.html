@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %} {{ game_infos[0][1] }} {% endblock %}
+{% block head %}
+  {{ super() }}
+ {% endblock %}
+{% block content %}
+    <div  style="text-align: center">
+    <br><br><br>
+    <h1>{{ game_infos[0][1]}}</h1>
+    <br>
+    <h2>{{ game_infos[0][2]}}</h2>
+    <br><br><br>
+    <button> Buy £ {{ game_infos[0][3] }} </button>
+    <script src="{{ url_for('static', filename='game_page.js') }}"></script>
+    </div>
+{% endblock %}
