@@ -4,6 +4,19 @@
   {{ super() }}
  {% endblock %}
 {% block content %}
-    <p id = 'paragraph'></p>
-     <script src="{{ url_for('static', filename='store.js') }}"></script>
+    <br><br><br>
+    <p id = 'paragraph'>
+    {% for game in list_game_info %}
+          <p style="text-align: center">
+              Game id : {{ game[0] }} , Name : {{ game[1] }} ,
+              Description : {{ game[2] }} , Price : {{ game[3] }}
+              <br>
+              {% if user_id %}
+                <button onclick= 'buygame({{ game[0] }},{{ user_id[0] }})'> Buy </button>
+              {% endif %}
+          </p> <br>
+    {% endfor %}
+    </p>
+    <script src="{{ url_for('static', filename='store.js') }}"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
 {% endblock %}

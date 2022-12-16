@@ -1,6 +1,14 @@
 {% extends "base.html" %}
-
+{% block title %}My games{% endblock %}
+{% block head %}
+  {{ super() }}
+ {% endblock %}
 {% block content %}
-games and stuff
-
+    <br><br><br>
+    <p id = 'paragraph'>
+    {% for game in list_game_info %}
+          <p style="text-align: center">Game id : {{ game[0] }} , Name : {{ game[1] }} ,  Description : {{ game[2] }} </p> <br>
+    {% endfor %}
+    </p>
+    <script src="{{ url_for('static', filename='my_games.js') }}"></script>
 {% endblock %}

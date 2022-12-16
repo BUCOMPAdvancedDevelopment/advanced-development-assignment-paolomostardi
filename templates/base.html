@@ -23,6 +23,9 @@
     {% if user_data %}
         <a href="/logout">Log out</a>
         <div>signed in as: {{ user_data['name'] }}</div>
+    {% else %}
+        <a href="/login">Login</a>
+        <div>Login to access exclusive features</div>
     {% endif %}
     </nav>
     {% endblock %}

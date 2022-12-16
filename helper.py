@@ -3,6 +3,7 @@ import os
 import google.oauth2.id_token
 import pymysql
 import requests
+from datetime import datetime
 
 from google.cloud import datastore
 from google.auth.transport import requests as googleRequests
@@ -52,7 +53,7 @@ def cloud_sql_query(query):
         "query": query,
     }, headers={"Content-type": "application/json", "Accept": "text/plain"})
     result = req.content
-    print(result)
+    print("running sql query: ",result)
     if result != b'Error: could not handle the request\n':
         return json.loads(result)
     else:
@@ -61,19 +62,58 @@ def cloud_sql_query(query):
 
 def get_sql_games_from_email(email, name):
     user_id = get_sql_user_id_from_email(email)
-    if user_id is None:
-        create_sql_user(email, name)
-        return None
-    print(user_id)
-    query = 'SELECT VIDEOGAME_ID from USER_VIDEOGAME WHERE user_id = \'' + str(user_id[0][0]) + '\''
-    return cloud_sql_query(query)
+    print("user id :",user_id)
+    if user_id:
+        query = 'SELECT VIDEOGAME_ID from USER_VIDEOGAME WHERE user_id = \'' + str(user_id[0][0]) + '\''
+        return cloud_sql_query(query)
+    create_sql_user(email, name)
+    return None
 
 
 def find_sql_game_from_id_list(list_id):
     list_game = []
     for game_id in list_id:
-        list_game.append(find_sql_game_from_id(game_id[0]))
+        game = find_sql_game_from_id(game_id[0])
+        list_game.append(game[0])
     return list_game
+
+
+def buy_game(user_id,game_id):
+    user_credit = get_user_credit(user_id)
+    print('user credit: ',user_credit)
+    game_price = get_game_price(game_id)
+    insert_success = insert_game_user_table(user_id, game_id)
+    if user_credit >= game_price and insert_success:
+        credit_update = update_user_credit(user_credit - game_price,user_id)
+        print('stats after buying: ',user_credit,game_price,user_id,game_id,credit_update,insert_success)
+        return True
+    return False
+
+
+def insert_game_user_table(user_id,game_id):
+    date = datetime.today().strftime('%Y-%m-%d')
+    query = 'INSERT INTO USER_VIDEOGAME  ( user_id, videogame_id,date_purchased ) VALUES ( \''+str(user_id)+'\', \''+str(game_id)+'\',\''+date+'\');'
+    return cloud_sql_insert(query)
+
+
+def game_already_bought(user_id, game_id):
+    query = 'SELECT * FROM USER_VIDEOGAME'
+    return cloud_sql_query(query)
+
+
+def update_user_credit(user_credit,user_id):
+    query = 'UPDATE USER_TABLE SET credit = '+str(user_credit)+' WHERE user_id = '+str(user_id)+';'
+    return cloud_sql_insert(query)
+
+
+def get_user_credit(user_id):
+    query = 'SELECT credit from USER_TABLE WHERE user_id = ' + str(user_id)
+    return cloud_sql_query(query)[0][0]
+
+
+def get_game_price(game_id):
+    query = 'SELECT PRICE from VIDEOGAME WHERE VIDEOGAME_ID = ' + str(game_id)
+    return cloud_sql_query(query)[0][0]
 
 
 def get_sql_user_id_from_email(email):

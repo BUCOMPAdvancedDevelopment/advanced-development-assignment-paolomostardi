@@ -31,37 +31,62 @@ def index():
 
 @app.route('/home')
 def home():
-    return render_template('home.html')
+    user_data, error, valid_token = helper.authenticateUser(request.cookies.get("token"))
+    return render_template('home.html', user_data=user_data)
 
 
 @app.route('/store')
 def store():
-    return render_template('store.html', listOfgame=getListOfGames())
-
+    user_data, error, valid_token = helper.authenticateUser(request.cookies.get("token"))
+    print(user_data)
+    if valid_token:
+        user_id = helper.get_sql_user_id_from_email(user_data['email'])
+        return render_template('store.html', list_game_info=get_list_of_all_games(),user_data=user_data,user_id=user_id)
+    return render_template('login.html')
 
 @app.route('/my_games')
 def my_games():
-    infos, error, valid_token = helper.authenticateUser(request.cookies.get("token"))
+    user_data, error, valid_token = helper.authenticateUser(request.cookies.get("token"))
     if valid_token:
-        id_game_list = helper.get_sql_games_from_email(infos['email'], infos['name'])
-        games_info = helper.find_sql_game_from_id_list(id_game_list)
-        return render_template('my_games.html', user_data=infos, games_info=games_info)
-    return redirect('/login')
+        list_game_info = []
+        id_game_list = helper.get_sql_games_from_email(user_data['email'], user_data['name'])
+        if id_game_list:
+            list_game_info = helper.find_sql_game_from_id_list(id_game_list)
+            print("list of game_info:",list_game_info)
+        return render_template('my_games.html', user_data=user_data, list_game_info=list_game_info)
+    return redirect('/home')
+
 
 
 @app.route('/login')
 def login():
+    user_data, error, valid_token = helper.authenticateUser(request.cookies.get("token"))
+    if valid_token:
+        return redirect('/my_games')
     return render_template('login.html')
 
 
-# used to get the list of games in javascript files and others
+
+@app.route('/logout')
+def logout():
+    user_data, error, valid_token = helper.authenticateUser(request.cookies.get("token"))
+    if valid_token:
+        return render_template('logout.html')
+    return redirect('/home')
+
+
+# used to get the list of all the games available to the store
 @app.route('/getListOfGames', methods=['GET'])
-def getListOfGames():
+def get_list_of_all_games():
     return helper.cloud_sql_query('select * from VIDEOGAME')
 
-@app.route('/test')
-def tester(sdfsdf):
-    return helper.find_sql_game_from_id_list(helper.get_sql_games_from_email('john.doe@gmail.com','test test'))
+
+@app.route('/hello/<name>/<age>')
+def hello(name, age):
+    return f'Hello, {name}! You are {age} years old.'
+
+def tester(asd):
+    return store()
 
 
 if __name__ == '__main__':
